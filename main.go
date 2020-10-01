@@ -19,6 +19,7 @@ import (
 	"flag"
 	"os"
 
+	batchv1 "github.com/abserari/cron-controller/api/v1"
 	webappv1 "github.com/abserari/cron-controller/api/v1"
 	"github.com/abserari/cron-controller/controllers"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -38,6 +39,7 @@ func init() {
 	_ = clientgoscheme.AddToScheme(scheme)
 
 	_ = webappv1.AddToScheme(scheme)
+	_ = batchv1.AddToScheme(scheme)
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -70,6 +72,18 @@ func main() {
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Guestbook")
+		os.Exit(1)
+	}
+	if err = (&controllers.CronJobReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("CronJob"),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "CronJob")
+		os.Exit(1)
+	}
+	if err = (&batchv1.CronJob{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "CronJob")
 		os.Exit(1)
 	}
 	// +kubebuilder:scaffold:builder

@@ -4,4 +4,7 @@ resources:
 - group: webapp
   kind: Guestbook
   version: v1
+- group: webapp
+  kind: CronJob
+  version: v1
 version: "2"
