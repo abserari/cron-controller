@@ -53,6 +53,12 @@ func (r *CronJobReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		log.Error(err, "unable to fetch cronjob")
 	}
 
+	var childJobs kbatch.JobList
+	if err := r.List(ctx, &childJobs, client.InNamespace(req.Namespace), client.MatchingFields{jobOwnerKey: req.Name}); err != nil {
+		log.Error(err, "unableto list child jobs")
+		return ctrl.Result{}, err
+	}
+
 	return ctrl.Result{}, nil
 }
 
